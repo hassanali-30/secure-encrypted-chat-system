@@ -1,75 +1,67 @@
 # Secure Encrypted Chat System
 
-A secure client-server chat application developed in Python that protects communication using AES-256 encryption.  
-The system allows multiple clients to communicate securely while supporting encrypted file transfer and basic threat detection.
+A Python client-server chat application with a Tkinter interface. The project combines TCP socket programming, encrypted messaging, authentication, encrypted file transfer, and basic spam/phishing detection.
 
 ## Features
-- AES-256 encrypted messaging
-- Secure client-server communication
+
+- AES-based encrypted messaging
+- Client-server communication over TCP sockets
 - User authentication
 - Encrypted file transfer
+- Multiple-client support
 - Spam detection
-- Phishing keyword detection
-- Multiple client support
-- Protection against packet sniffing
+- Phishing-keyword detection
+- Tkinter graphical interface
 
-## Technologies Used
+## Technologies
+
 - Python 3
-- TCP Socket Programming
-- AES Encryption
-- Tkinter GUI
-- Pickle Serialization
+- TCP sockets
+- AES encryption
+- Tkinter
+- Pickle-based message serialization
 
-## Project Structure
+## Requirements
 
-secure-encrypted-chat-system  
-│  
-├── project.py  
-├── README.md  
-├── requirements.txt  
-│  
-├── report  
-│   └── project_report.pdf  
-│  
-└── screenshots  
+Install the dependencies listed in `requirements.txt`:
 
-## Installation
+```bash
+python -m pip install -r requirements.txt
+```
 
-Clone the repository:
+## Run
 
-git clone https://github.com/yourusername/secure-encrypted-chat-system.git
+Clone the repository and enter its directory:
 
-Move into the folder:
-
+```bash
+git clone https://github.com/hassanali-30/secure-encrypted-chat-system.git
 cd secure-encrypted-chat-system
-
-Install dependencies:
-
-pip install -r requirements.txt
-
-## Running the Project
+```
 
 Start the server:
 
+```bash
 python3 project.py server
+```
 
-Start the client:
+Start a client in another terminal:
 
+```bash
 python3 project.py client
+```
 
-Multiple clients can connect to the server simultaneously.
+Use `python` instead of `python3` on Windows if that is the command configured for Python 3.
 
-## Security Features
-- End-to-end encrypted messaging
-- Encrypted file transfer
-- Spam detection system
-- Phishing keyword detection
-- Protection against packet sniffing
+## Project Structure
 
-## Testing
-Wireshark packet analysis confirmed that all transmitted data appears encrypted and unreadable.
+```text
+project.py              # Client and server application
+requirements.txt        # Python dependencies
+report/                 # Project report, if present
+screenshots/            # Demonstration images, if present
+README.md               # Project documentation
+```
 
-## Author
-Hassan Ali (23-cys-035)  
-Cybersecurity Student  
-HITEC University Taxila
+## Security Note
+
+This is an educational project. Review key management, authentication, serialization, and transport protections carefully before using it with real or sensitive communications.
