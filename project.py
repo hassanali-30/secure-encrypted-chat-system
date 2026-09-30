@@ -58,19 +58,27 @@ def send_secure(sock, data: bytes):
     encrypted = encrypt_data(data)
     sock.sendall(struct.pack("!I", len(encrypted)) + encrypted)
 
-def recv_secure(sock):
-    raw_len = sock.recv(4)
-    if not raw_len:
-        return None
-    size = struct.unpack("!I", raw_len)[0]
-
-    data = b""
+def recv_exact(sock, size: int):
+    """Read exactly one frame component from a TCP stream."""
+    data = bytearray()
     while len(data) < size:
         chunk = sock.recv(size - len(data))
         if not chunk:
             return None
-        data += chunk
+        data.extend(chunk)
+    return bytes(data)
 
+def recv_secure(sock):
+    raw_len = recv_exact(sock, 4)
+    if not raw_len:
+        return None
+    size = struct.unpack("!I", raw_len)[0]
+    if size <= 0 or size > 16 * 1024 * 1024:
+        raise ValueError("invalid message size")
+
+    data = recv_exact(sock, size)
+    if data is None:
+        return None
     return decrypt_data(data)
 
 # ================= SERVER =================
@@ -84,9 +92,12 @@ def is_phishing(msg):
     return any(k in msg.lower() for k in PHISHING_KEYWORDS)
 
 def broadcast(payload, sender=None):
-    for u, c in clients.items():
+    for u, c in list(clients.items()):
         if u != sender:
-            send_secure(c, payload)
+            try:
+                send_secure(c, payload)
+            except OSError:
+                clients.pop(u, None)
 
 def handle_client(conn):
     user = None
@@ -136,9 +147,10 @@ def handle_client(conn):
 
 def start_server():
     s = socket.socket()
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind(("0.0.0.0", PORT))
     s.listen()
-    print("🟢 Server running on port", PORT)
+    print("🟢 Server running on port", PORT, flush=True)
     while True:
         c, _ = s.accept()
         threading.Thread(target=handle_client, args=(c,), daemon=True).start()
@@ -229,11 +241,16 @@ def start_client():
     win.mainloop()
 
 # ================= MAIN =================
-if len(sys.argv) != 2:
-    print("Usage: python project.py server|client")
-    sys.exit()
+def main() -> int:
+    if len(sys.argv) != 2 or sys.argv[1] not in {"server", "client"}:
+        print("Usage: python project.py server|client")
+        return 2
+    if sys.argv[1] == "server":
+        start_server()
+    else:
+        start_client()
+    return 0
 
-if sys.argv[1] == "server":
-    start_server()
-elif sys.argv[1] == "client":
-    start_client()
+
+if __name__ == "__main__":
+    raise SystemExit(main())
